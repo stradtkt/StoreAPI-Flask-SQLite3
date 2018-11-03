@@ -33,3 +33,11 @@ class Product:
         cursor.execute(query, (product['name'], product['price'], product['description']))
         connection.commit()
         connection.close()
+
+    def update(self, product):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+        query = "UPDATE products SET price=?, desc=? WHERE name=?"
+        cursor.execute(query, (product['price'], product['description'], product['name']))
+        connection.commit()
+        connection.close()
