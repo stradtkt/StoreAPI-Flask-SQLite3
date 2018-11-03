@@ -1,6 +1,6 @@
 import sqlite3
 
-class Product:
+class ProductModel:
     def __init__(self, name, price, description):
         self.name = name
         self.price = price
