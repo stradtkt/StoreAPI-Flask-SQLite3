@@ -1,43 +1,32 @@
-import sqlite3
+from db import db
 
-class ProductModel:
+class ProductModel(db.Model):
+    __tablename__ = 'products'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80))
+    price = db.Column(db.Float(precision=2))
+    description = db.Column(db.String(255))
+
     def __init__(self, name, price, description):
         self.name = name
         self.price = price
         self.description = description
 
-    def find_by_name(self, name):
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
-        query = "SELECT * FROM products WHERE name=?"
-        result = cursor.execute(query, (name,))
-        row = result.fetchone()
-        connection.close()
-        if row:
-            return {'product': {'name': row[0], 'price': row[1], 'description': row[2]}}
-        
-    def find_by_id(self, id):
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
-        query = "SELECT * FROM products WHERE id=?"
-        result = cursor.execute(query, (id,))
-        row = result.fetchone()
-        connection.close()
-        if row:
-            return {'product': {'name': row[0], 'price': row[1], 'description': row[2]}}
+    def json(self):
+        return {'name': self.name, 'price': self.price, 'description': self.description}
 
-    def insert(self, product):
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
-        query = "INSERT INTO products VALUES (?, ?, ?)"
-        cursor.execute(query, (product['name'], product['price'], product['description']))
-        connection.commit()
-        connection.close()
+    @classmethod
+    def find_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()
 
-    def update(self, product):
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
-        query = "UPDATE products SET price=?, description=? WHERE name=?"
-        cursor.execute(query, (product['price'], product['description'], product['name']))
-        connection.commit()
-        connection.close()
+    @classmethod
+    def find_by_id(cls, id):
+        return cls.query.filter_by(id=id).first()
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
